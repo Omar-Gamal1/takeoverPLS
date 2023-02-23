@@ -43,16 +43,16 @@ shift "$(($OPTIND -1))"
 
 
 
-# #first start nuclei 
-# echo -e "\n\n                       starting nuclei\n\n" | lolcat 
-# sleep 1
-# cat $subdomains_file | nuclei -nh -tags takeover -severity low,medium,high,critical -r $resolvers_trusted -retries 3 -rl 150 -v -o nuclei_output.txt
+#first start nuclei 
+echo -e "\n\n                       starting nuclei\n\n" | lolcat 
+sleep 1
+cat $subdomains_file | nuclei -nh -tags takeover -severity low,medium,high,critical -r $resolvers_trusted -retries 3 -rl 150 -v -o nuclei_output.txt
 
 
-# #subjack
-# echo -e "\n\n                       starting subjack\n\n" | lolcat 
-# sleep 1
-# subjack -w $subdomains_file -timeout 30 -ssl -v -m -t 100 -o subjack_output.txt -c /home/pablo/go/pkg/mod/github.com/haccer/subjack@v0.0.0-20201112041112-49c51e57deab/fingerprints.json
+#subjack
+echo -e "\n\n                       starting subjack\n\n" | lolcat 
+sleep 1
+subjack -w $subdomains_file -timeout 30 -ssl -v -m -t 100 -o subjack_output.txt -c 
 
 
 #subOver
