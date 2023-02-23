@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# Initialize variables
+subdomains_file=""
+k=""
+resolvers_trusted=~/Tools/resolvers_trusted.txt
+
+# Define usage function
+function usage {
+  echo -e "\nUsage: $0 -S <subdomain file>\n" |  lolcat
+  echo "  -S    <subdomains file>" | lolcat
+  echo "  -k    <keyword>        " | lolcat
+  exit 1
+}
+
+# Parse command line options
+while getopts "S:k:h" opt; do
+  case $opt in
+    S)
+      subdomains_file=$OPTARG
+      ;;
+    k)
+	  k=$OPTARG
+	  ;;
+    h)
+      usage
+      ;;
+    \?)
+      usage
+      ;;
+    :)
+      echo "Error: option requires an argument"
+      usage
+      ;;
+  esac
+done
+
+# Check if both arguments were passed
+if [ -z "$subdomains_file" ]; then
+  usage
+fi
+shift "$(($OPTIND -1))"
+
+
+
+# #first start nuclei 
+# echo -e "\n\n                       starting nuclei\n\n" | lolcat 
+# sleep 1
+# cat $subdomains_file | nuclei -nh -tags takeover -severity low,medium,high,critical -r $resolvers_trusted -retries 3 -rl 150 -v -o nuclei_output.txt
+
+
+# #subjack
+# echo -e "\n\n                       starting subjack\n\n" | lolcat 
+# sleep 1
+# subjack -w $subdomains_file -timeout 30 -ssl -v -m -t 100 -o subjack_output.txt -c /home/pablo/go/pkg/mod/github.com/haccer/subjack@v0.0.0-20201112041112-49c51e57deab/fingerprints.json
+
+
+#subOver
+echo -e "\n\n                       starting subOver\n\n" | lolcat 
+sleep 1
+cp ~/Tools/providers.json .
+SubOver -l $subdomains_file -o subover_output.txt
+rm providers.json 
+
+
+#sub404
+echo -e "\n\n                       starting sub404\n\n" | lolcat 
+sleep 1
+python3 ~/Tools/sub404/sub404.py -f $subdomains_file -o sub404_output.txt
+
+
+#dns takeover
+echo -e "\n\n                       starting dnstake\n\n" | lolcat 
+sleep 1
+cat $subdomains_file 2>/dev/null | dnstake -c 100 | sed '/^$/d' | anew -q dnstake_output.txt 
+
+
+#s3
+echo -e "\n\n                       starting s3scanner\n\n" | lolcat 
+sleep 1
+s3scanner scan -f $subdomains_file | anew -q s3buckets_output.txt
+
+
+#cloud Enum
+echo -e "\n\n                       starting cloud_enum\n\n" | lolcat 
+sleep 1
+python3 ~/Tools/cloud_enum/cloud_enum.py -k $k -l cloudEnum_output.txt 2>/dev/null 
